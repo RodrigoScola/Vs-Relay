@@ -19,5 +19,7 @@ describe("server instructions", () => {
     expect(SERVER_INSTRUCTIONS).toContain("testing.runAll");
     expect(SERVER_INSTRUCTIONS).toContain("vscode_list_commands");
     expect(SERVER_INSTRUCTIONS).toContain("do not sleep");
+    expect(SERVER_INSTRUCTIONS).toContain("no Test Explorer adapter wired up");
+    expect(SERVER_INSTRUCTIONS).toContain("do not fall back to vscode_terminal_run");
   });
 });
