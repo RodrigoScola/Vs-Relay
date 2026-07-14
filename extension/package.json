@@ -8,8 +8,12 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -29,14 +33,20 @@
           "type": "number",
           "default": 4823,
           "description": "Port the bridge WebSocket server listens on."
+        },
+        "claudeBridge.autoConfigureMcp": {
+          "type": "boolean",
+          "default": true,
+          "description": "On activation, automatically add a \"vscode-bridge\" MCP server entry to .mcp.json and .vscode/mcp.json in each open workspace folder if one isn't already present, pointing at this extension's bundled MCP server."
         }
       }
     }
   },
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && npm run bundle:mcp-server",
+    "bundle:mcp-server": "esbuild ../mcp-server/src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=bundled/mcp-server.cjs",
     "watch": "tsc -p . --watch",
-    "package": "npx @vscode/vsce package --no-dependencies",
+    "package": "npm run build && npx @vscode/vsce package --no-dependencies",
     "test": "vitest run"
   },
   "dependencies": {
@@ -47,6 +57,7 @@
     "@types/node": "^20.14.0",
     "@types/vscode": "^1.85.0",
     "@types/ws": "^8.5.12",
+    "esbuild": "^0.28.1",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   }

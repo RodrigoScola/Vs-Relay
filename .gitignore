@@ -1,6 +1,7 @@
 node_modules/
 out/
 dist/
+extension/bundled/
 *.vsix
 .vscode-test/
 *.log

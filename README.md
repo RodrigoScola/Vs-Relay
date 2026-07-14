@@ -15,10 +15,21 @@ Claude  <--stdio (MCP)-->  mcp-server  <--WebSocket (localhost)-->  extension  <
   VSCode API.
 - **`mcp-server/`** — a standalone MCP server (stdio transport) that connects to the extension's
   WebSocket server and exposes each bridge method as an MCP tool (`vscode_get_open_files`,
-  `vscode_apply_edit`, `vscode_run_task`, `vscode_debug_start`, `vscode_execute_command`, etc.).
+  `vscode_apply_edit`, `vscode_run_task`, `vscode_debug_start`, `vscode_execute_command`,
+  `vscode_list_commands`, etc.).
 
 The extension must be running (i.e. VSCode open with the workspace loaded) before the MCP server
 can do anything — it's a thin client that fails fast with a clear error if it can't connect.
+
+**The extension is self-contained.** At build time, `extension`'s build script bundles all of
+`mcp-server` (via esbuild, into `extension/bundled/mcp-server.cjs`) so the packaged `.vsix` doesn't
+depend on a separate `npm install`/build of `mcp-server` — it's just `node` + one file. On
+activation, the extension automatically adds a `vscode-bridge` entry (pointing at that bundled
+file) to `.mcp.json` (Claude Code CLI) and `.vscode/mcp.json` (VSCode's own MCP support, e.g.
+Copilot) in every open workspace folder, if one isn't already present — so installing the
+extension is normally the *only* setup step; there is nothing to configure by hand. It never
+overwrites an existing `vscode-bridge` entry or touches a file it can't parse. Disable this with
+`"claudeBridge.autoConfigureMcp": false`.
 
 ## Setup
 
@@ -35,10 +46,13 @@ npm workspaces).
 1. **Start the extension.** Press `F5` in VSCode (or Run and Debug → "Run Extension (Extension
    Development Host)"). This opens a second VSCode window with the bridge extension active,
    pre-loaded with [`test-workspace/`](test-workspace) — a small scratch folder with a sample
-   file, a sample task, and `.vscode/mcp.json` already pointing at `mcp-server/dist/index.js`.
-   Check the extension's status bar item or the "Claude VSCode Bridge" output channel to confirm
-   it's listening, then use the MCP/Tools view in that window (or Copilot Chat's MCP picker) to
-   start the `vscode-bridge` server and try a tool against `test-workspace/src/sample.ts`.
+   file and a sample task. `test-workspace/.vscode/mcp.json` was created manually before
+   auto-provisioning existed and points at the dev-mode `mcp-server/dist/index.js`; the
+   auto-provisioning feature described above only fills in a `vscode-bridge` entry when one is
+   *missing*, so it leaves that file alone. Check the extension's status bar item or the "Claude
+   VSCode Bridge" output channel to confirm it's listening, then use the MCP/Tools view in that
+   window (or Copilot Chat's MCP picker) to start the `vscode-bridge` server and try a tool
+   against `test-workspace/src/sample.ts`.
 2. **Point an MCP client at the server.** This repo's root already has [`.mcp.json`](.mcp.json)
    configuring `vscode-bridge` for the **Claude Code CLI** — restart Claude Code (or start a fresh
    session) in this directory and it'll show up under `/mcp` (it'll ask for a one-time trust

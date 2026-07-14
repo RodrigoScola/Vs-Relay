@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { DEFAULT_PORT } from "@claude-vscode/shared";
 import { BridgeServer } from "./bridgeServer";
 import { createHandlers } from "./handlers";
+import { ensureMcpConfigured } from "./mcpProvisioning";
 import { BridgeState } from "./state";
 
 let bridgeServer: BridgeServer | undefined;
@@ -43,6 +44,10 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(statusBarItem);
 
   startServer(context, output);
+
+  void ensureMcpConfigured(context, getPort(), output).catch((error: unknown) => {
+    output.appendLine(`Failed to auto-configure MCP server entries: ${String(error)}`);
+  });
 
   context.subscriptions.push(
     vscode.commands.registerCommand("claudeBridge.restart", () => {
