@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "npm",
+      "script": "build",
+      "path": "",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "watch: shared",
+      "type": "npm",
+      "script": "watch",
+      "path": "shared",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": { "reveal": "silent", "group": "watch" }
+    },
+    {
+      "label": "watch: extension",
+      "type": "npm",
+      "script": "watch",
+      "path": "extension",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": { "reveal": "silent", "group": "watch" }
+    },
+    {
+      "label": "watch: mcp-server",
+      "type": "npm",
+      "script": "watch",
+      "path": "mcp-server",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": { "reveal": "silent", "group": "watch" }
+    },
+    {
+      "label": "watch: all",
+      "dependsOn": ["watch: shared", "watch: extension", "watch: mcp-server"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run MCP Inspector",
+      "type": "shell",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/inspector", "node", "mcp-server/dist/index.js"],
+      "dependsOn": ["build"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

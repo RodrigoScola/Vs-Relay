@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Extension (Extension Development Host)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/extension", "${workspaceFolder}/test-workspace"],
+      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js", "${workspaceFolder}/shared/dist/**/*.js"],
+      "preLaunchTask": "build",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug MCP Server (stdio)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-server/dist/index.js",
+      "outFiles": ["${workspaceFolder}/mcp-server/dist/**/*.js", "${workspaceFolder}/shared/dist/**/*.js"],
+      "preLaunchTask": "build",
+      "console": "integratedTerminal",
+      "env": { "CLAUDE_BRIDGE_PORT": "4823" },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Vitest: Debug Current File",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "run", "${relativeFile}"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run Extension + MCP Inspector",
+      "configurations": ["Run Extension (Extension Development Host)"],
+      "preLaunchTask": "Run MCP Inspector",
+      "stopAll": true
+    }
+  ]
+}

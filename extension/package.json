@@ -1,0 +1,53 @@
+{
+  "name": "claude-vscode-bridge",
+  "displayName": "Claude VSCode Bridge",
+  "description": "Exposes VSCode editor, file, run/debug, and UI actions over a local WebSocket for the Claude VSCode Bridge MCP server.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeBridge.restart",
+        "title": "Claude Bridge: Restart Server"
+      },
+      {
+        "command": "claudeBridge.showStatus",
+        "title": "Claude Bridge: Show Status"
+      }
+    ],
+    "configuration": {
+      "title": "Claude VSCode Bridge",
+      "properties": {
+        "claudeBridge.port": {
+          "type": "number",
+          "default": 4823,
+          "description": "Port the bridge WebSocket server listens on."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "package": "npx @vscode/vsce package --no-dependencies",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@claude-vscode/shared": "0.1.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

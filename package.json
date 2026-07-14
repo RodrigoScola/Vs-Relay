@@ -1,0 +1,26 @@
+{
+  "name": "claude-vscode-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "shared",
+    "extension",
+    "mcp-server"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=shared && npm run build --workspace=extension && npm run build --workspace=mcp-server",
+    "watch": "npm run build --workspace=shared && concurrently \"npm:watch --workspace=extension\" \"npm:watch --workspace=mcp-server\"",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@vitest/ui": "^2.1.4",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.14.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0",
+    "vitest": "^2.1.4"
+  }
+}

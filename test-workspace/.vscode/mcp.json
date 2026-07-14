@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "vscode-bridge": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/../mcp-server/dist/index.js"],
+      "env": {
+        "CLAUDE_BRIDGE_PORT": "4823"
+      }
+    }
+  }
+}
