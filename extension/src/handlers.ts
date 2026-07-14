@@ -82,7 +82,10 @@ function commandsFromExtension(extension: vscode.Extension<unknown>): CommandInf
   const result: CommandInfo[] = [];
   for (const entry of rawCommands) {
     const record = asRecord(entry);
-    const id = record?.["command"];
+    if (!record) {
+      continue;
+    }
+    const id = record["command"];
     if (typeof id !== "string") {
       continue;
     }
@@ -369,7 +372,8 @@ export function createHandlers(state: BridgeState): Handlers {
         .filter((command) => registeredIds.has(command.id))
         .sort((a, b) => a.id.localeCompare(b.id));
 
-      const filtered = params.query !== undefined ? commands.filter((command) => matchesQuery(command, params.query as string)) : commands;
+      const { query } = params;
+      const filtered = query !== undefined ? commands.filter((command) => matchesQuery(command, query)) : commands;
       return { commands: filtered };
     },
   };

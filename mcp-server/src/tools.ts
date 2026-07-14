@@ -23,6 +23,10 @@ function textResult(value: unknown): { content: { type: "text"; text: string }[]
   return { content: [{ type: "text", text }] };
 }
 
+function confirm(ok: boolean, whenTrue: string, whenFalse: string): { content: { type: "text"; text: string }[] } {
+  return textResult(ok ? whenTrue : whenFalse);
+}
+
 function formatDiagnostics(result: { diagnostics: DiagnosticInfo[] }): { content: { type: "text"; text: string }[] } {
   if (result.diagnostics.length === 0) {
     return textResult("No diagnostics.");
@@ -100,7 +104,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         preview: z.boolean().optional().describe("Open in preview (single-use) tab mode. Defaults to false."),
       },
     },
-    async ({ path, preview }) => textResult(await client.call("file/open", { path, preview })),
+    async ({ path, preview }) => {
+      const { opened } = await client.call("file/open", { path, preview });
+      return confirm(opened, `Opened ${path}.`, `Could not open ${path}.`);
+    },
   );
 
   server.registerTool(
@@ -112,7 +119,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         edits: z.array(textEditSchema).min(1).describe("List of range replacements to apply"),
       },
     },
-    async ({ path, edits }) => textResult(await client.call("file/applyEdit", { path, edits })),
+    async ({ path, edits }) => {
+      const { applied } = await client.call("file/applyEdit", { path, edits });
+      return confirm(applied, `Applied ${String(edits.length)} edit(s) to ${path}.`, `Failed to apply edits to ${path}.`);
+    },
   );
 
   server.registerTool(
@@ -125,7 +135,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         overwrite: z.boolean().optional().describe("Overwrite if the file already exists. Defaults to false."),
       },
     },
-    async ({ path, content, overwrite }) => textResult(await client.call("file/create", { path, content, overwrite })),
+    async ({ path, content, overwrite }) => {
+      const { created } = await client.call("file/create", { path, content, overwrite });
+      return confirm(created, `Created ${path}.`, `Could not create ${path}.`);
+    },
   );
 
   server.registerTool(
@@ -137,7 +150,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         useTrash: z.boolean().optional().describe("Send to OS trash instead of permanent delete. Defaults to true."),
       },
     },
-    async ({ path, useTrash }) => textResult(await client.call("file/delete", { path, useTrash })),
+    async ({ path, useTrash }) => {
+      const { deleted } = await client.call("file/delete", { path, useTrash });
+      return confirm(deleted, `Deleted ${path}.`, `Could not delete ${path}.`);
+    },
   );
 
   server.registerTool(
@@ -150,7 +166,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         overwrite: z.boolean().optional().describe("Overwrite destination if it exists. Defaults to false."),
       },
     },
-    async ({ oldPath, newPath, overwrite }) => textResult(await client.call("file/rename", { oldPath, newPath, overwrite })),
+    async ({ oldPath, newPath, overwrite }) => {
+      const { renamed } = await client.call("file/rename", { oldPath, newPath, overwrite });
+      return confirm(renamed, `Renamed ${oldPath} to ${newPath}.`, `Could not rename ${oldPath}.`);
+    },
   );
 
   server.registerTool(
@@ -162,7 +181,14 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         position: positionSchema,
       },
     },
-    async ({ path, position }) => textResult(await client.call("file/goToLocation", { path, position })),
+    async ({ path, position }) => {
+      const { moved } = await client.call("file/goToLocation", { path, position });
+      return confirm(
+        moved,
+        `Moved cursor to ${path}:${String(position.line + 1)}:${String(position.character + 1)}.`,
+        `Could not move cursor in ${path}.`,
+      );
+    },
   );
 
   server.registerTool(
@@ -180,7 +206,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
       description: "Run a workspace task by name.",
       inputSchema: { name: z.string().describe("Exact task name as returned by vscode_get_tasks") },
     },
-    async ({ name }) => textResult(await client.call("run/runTask", { name })),
+    async ({ name }) => {
+      const { started } = await client.call("run/runTask", { name });
+      return confirm(started, `Started task "${name}".`, `Could not start task "${name}".`);
+    },
   );
 
   server.registerTool(
@@ -192,7 +221,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         workspaceFolder: z.string().optional().describe("Workspace folder name, for multi-root workspaces."),
       },
     },
-    async ({ configName, workspaceFolder }) => textResult(await client.call("debug/start", { configName, workspaceFolder })),
+    async ({ configName, workspaceFolder }) => {
+      const { started } = await client.call("debug/start", { configName, workspaceFolder });
+      return confirm(started, "Debug session started.", "Debug session did not start.");
+    },
   );
 
   server.registerTool(
@@ -203,7 +235,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         sessionId: z.string().optional().describe("Session id from vscode_debug_get_sessions. Stops the active one if omitted."),
       },
     },
-    async ({ sessionId }) => textResult(await client.call("debug/stop", { sessionId })),
+    async ({ sessionId }) => {
+      const { stopped } = await client.call("debug/stop", { sessionId });
+      return confirm(stopped, "Debug session stopped.", "No matching debug session to stop.");
+    },
   );
 
   server.registerTool(
@@ -246,7 +281,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         command: z.string().describe("Shell command to run"),
       },
     },
-    async ({ name, command }) => textResult(await client.call("terminal/run", { name, command })),
+    async ({ name, command }) => {
+      const { sent } = await client.call("terminal/run", { name, command });
+      return confirm(sent, `Sent to terminal: ${command}`, `Could not send command to terminal.`);
+    },
   );
 
   server.registerTool(
@@ -259,7 +297,10 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         items: z.array(z.string()).optional().describe("Button labels"),
       },
     },
-    async ({ message, kind, items }) => textResult(await client.call("ui/showMessage", { message, kind, items })),
+    async ({ message, kind, items }) => {
+      const { selected } = await client.call("ui/showMessage", { message, kind, items });
+      return textResult(selected !== null ? `Clicked: ${selected}` : "Dismissed with no selection.");
+    },
   );
 
   server.registerTool(
@@ -271,18 +312,39 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
         placeholder: z.string().optional(),
       },
     },
-    async ({ items, placeholder }) => textResult(await client.call("ui/showQuickPick", { items, placeholder })),
+    async ({ items, placeholder }) => {
+      const { selected } = await client.call("ui/showQuickPick", { items, placeholder });
+      return textResult(selected !== null ? `Selected: ${selected}` : "Dismissed with no selection.");
+    },
   );
 
   server.registerTool(
     "vscode_execute_command",
     {
-      description: "Execute an arbitrary registered VSCode command by id. Escape hatch for actions not covered by other tools.",
+      description:
+        "Execute an arbitrary registered VSCode command by id. Escape hatch for actions not covered by other " +
+        "tools (git operations, other installed extensions, workbench actions, etc). If you don't already know " +
+        "the exact command id, call vscode_list_commands first to find it — don't guess ids from memory.",
       inputSchema: {
         command: z.string().describe('VSCode command id, e.g. "workbench.action.files.save"'),
         args: z.array(z.unknown()).optional(),
       },
     },
     async ({ command, args }) => textResult(await client.call("ui/executeCommand", { command, args })),
+  );
+
+  server.registerTool(
+    "vscode_list_commands",
+    {
+      description:
+        "Search VSCode's live command registry (id, title, category) for every installed extension, including " +
+        "built-ins like Git (git.init, git.commit, git.push, ...). Use this to find the exact command id for " +
+        "something not covered by the other vscode_* tools, then run it with vscode_execute_command. Always " +
+        "pass a query — omitting it returns every palette-visible command in the editor (a very large list).",
+      inputSchema: {
+        query: z.string().optional().describe('Case-insensitive substring match against id/title/category, e.g. "git commit"'),
+      },
+    },
+    async ({ query }) => textResult(await client.call("ui/listCommands", { query })),
   );
 }

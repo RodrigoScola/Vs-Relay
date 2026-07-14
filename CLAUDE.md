@@ -1,37 +1,22 @@
 # Claude VSCode Bridge
 
-## Running tests via the vscode-bridge MCP server
+## Where user-facing tool guidance lives
 
-When asked to run tests in this repo through the `vscode-bridge` MCP tools, **always** use
-`vscode_execute_command` with a VS Code testing command — never `vscode_terminal_run` (that
-shells out to `vitest` directly instead of using the Test Explorer).
+Guidance on *how to use* the `vscode-bridge` MCP tools (testing workflow, preferring
+focus-bringing actions, command discovery) lives in
+[`mcp-server/src/instructions.ts`](mcp-server/src/instructions.ts) — it's sent to every MCP client
+as the server's `instructions` field during the `initialize` handshake (see the MCP spec /
+`ServerOptions.instructions`). That reaches **everyone who uses the built extension**, in any
+project, on any machine — not just sessions that happen to have this repo open. This file
+(`CLAUDE.md`) only reaches Claude Code sessions working *on this repo's source*, which is a much
+narrower audience, so don't put end-user tool guidance here — put it in `instructions.ts` and
+update `mcp-server/src/instructions.test.ts` alongside it.
 
-- Run everything: `vscode_execute_command` with `command: "testing.runAll"`
-- Run just the currently open file's tests: `command: "testing.runCurrentFile"`
+## Working on this repo
 
-**Do not `sleep`/poll afterward.** These commands only resolve once the run has fully finished —
-confirmed by testing: `testing.runCurrentFile`'s own return value already contains the complete
-per-test result tree (`items[].tasks[].state`, where `3` = passed, `4` = failed), available
-immediately in the tool response.
-
-**`vscode_get_diagnostics` also reflects vitest failures**, not just tsc/eslint — confirmed by
-testing: a failing `expect()` shows up as a diagnostic with the assertion message, file, and line.
-It's a reliable and now human-readable (not raw JSON) way to check results after a run.
-
-## Prefer actions that bring visual focus
-
-Whenever a `vscode-bridge` action has a "focus" equivalent — opening a file, jumping to a
-location, selecting a result — always do the version that actually brings it into view/focus in
-the editor, rather than a passive/background variant, so the user can see what happened without
-extra steps.
-
-- `vscode_open_file` already focuses the editor by default (don't pass anything that would
-  suppress that).
-- After opening/creating a file, also reveal it in the Explorer tree with
-  `vscode_execute_command` → `revealInExplorer` (or `workbench.files.action.showActiveFileInExplorer`
-  for the currently active editor) so it's visible there too, not just as an editor tab.
-- Prefer `vscode_go_to_location` over `vscode_apply_edit` alone when the user cares about seeing
-  where a change landed — it opens the file and moves the cursor/selection there.
-- When multiple candidates match a request (e.g. several files with the same name), pick the one
-  most likely intended by context rather than defaulting to whichever happened to sort first, and
-  say which one was opened.
+- All three packages (`shared`, `extension`, `mcp-server`) build under a shared strict
+  `tsconfig.base.json` and lint clean under `eslint.config.mjs`'s type-checked strict rule sets —
+  keep new code passing both (`npm run build`, `npx eslint .`).
+- `test-workspace/` is a manual-testing fixture opened by the "Run Extension" launch config; it's
+  excluded from lint/type-checking on purpose.
+- Run `npm test` (vitest, across all three packages) before considering a change done.
