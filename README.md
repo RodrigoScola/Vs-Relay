@@ -116,6 +116,7 @@ passed through from zod-parsed tool arguments.
 2. Implement it in `extension/src/handlers.ts`.
 3. Expose it as a tool in `mcp-server/src/tools.ts` with a zod input schema.
 
+
 ## Packaging the extension
 
 ```

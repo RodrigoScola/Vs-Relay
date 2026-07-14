@@ -48,7 +48,8 @@
     }
   },
   "scripts": {
-    "build": "tsc -p . && npm run bundle:mcp-server",
+    "build": "tsc -p . --noEmit && npm run bundle:extension && npm run bundle:mcp-server",
+    "bundle:extension": "esbuild src/extension.ts --bundle --platform=node --target=node18 --format=cjs --outfile=dist/extension.js --external:vscode",
     "bundle:mcp-server": "esbuild ../mcp-server/src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=bundled/mcp-server.cjs",
     "watch": "tsc -p . --watch",
     "package": "npm run build && npx @vscode/vsce package --no-dependencies",
