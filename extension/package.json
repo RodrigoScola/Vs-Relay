@@ -34,6 +34,11 @@
           "default": 4823,
           "description": "Port the bridge WebSocket server listens on."
         },
+        "claudeBridge.mcpHttpPort": {
+          "type": "number",
+          "default": 4824,
+          "description": "Port the bundled MCP server's HTTP endpoint listens on. The extension spawns this server on activation."
+        },
         "claudeBridge.autoConfigureMcp": {
           "type": "boolean",
           "default": true,

@@ -3,10 +3,6 @@ import * as vscode from "vscode";
 import { __mockControls } from "./test/vscodeMock";
 import { ensureMcpConfigured } from "./mcpProvisioning";
 
-function fakeContext(bundledPath: string): vscode.ExtensionContext {
-  return { asAbsolutePath: (relative: string) => `${bundledPath}/${relative}` } as unknown as vscode.ExtensionContext;
-}
-
 function fakeOutput(): vscode.OutputChannel {
   return { appendLine: () => undefined, show: () => undefined } as unknown as vscode.OutputChannel;
 }
@@ -23,62 +19,62 @@ describe("ensureMcpConfigured", () => {
 
   it("does nothing when there are no workspace folders", async () => {
     __mockControls.setWorkspaceFolders([]);
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
     expect(__mockControls.getFile(mcpJsonUri)).toBeUndefined();
   });
 
   it("does nothing when claudeBridge.autoConfigureMcp is disabled", async () => {
     __mockControls.setConfig({ autoConfigureMcp: false });
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
     expect(__mockControls.getFile(mcpJsonUri)).toBeUndefined();
   });
 
   it("creates .mcp.json and .vscode/mcp.json with a vscode-bridge entry when missing", async () => {
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { "vscode-bridge": { command: string; args: string[]; env: { CLAUDE_BRIDGE_PORT: string } } };
+      mcpServers: { "vscode-bridge": { type: string; url: string } };
     };
-    expect(mcpJson.mcpServers["vscode-bridge"].command).toBe("node");
-    expect(mcpJson.mcpServers["vscode-bridge"].args).toEqual(["/ext/bundled/mcp-server.cjs"]);
-    expect(mcpJson.mcpServers["vscode-bridge"].env.CLAUDE_BRIDGE_PORT).toBe("4823");
+    expect(mcpJson.mcpServers["vscode-bridge"].type).toBe("http");
+    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
 
     const vscodeMcpJson = JSON.parse(__mockControls.getFile(vscodeMcpJsonUri) ?? "{}") as {
-      servers: { "vscode-bridge": { command: string } };
+      servers: { "vscode-bridge": { type: string; url: string } };
     };
-    expect(vscodeMcpJson.servers["vscode-bridge"].command).toBe("node");
+    expect(vscodeMcpJson.servers["vscode-bridge"].type).toBe("http");
+    expect(vscodeMcpJson.servers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
   });
 
   it("does not overwrite an existing vscode-bridge entry", async () => {
     __mockControls.setFile(
       mcpJsonUri,
-      JSON.stringify({ mcpServers: { "vscode-bridge": { command: "custom", args: [], env: {} } } }),
+      JSON.stringify({ mcpServers: { "vscode-bridge": { type: "http", url: "http://custom/mcp" } } }),
     );
 
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { "vscode-bridge": { command: string } };
+      mcpServers: { "vscode-bridge": { url: string } };
     };
-    expect(mcpJson.mcpServers["vscode-bridge"].command).toBe("custom");
+    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://custom/mcp");
   });
 
   it("preserves other entries already in the file", async () => {
     __mockControls.setFile(mcpJsonUri, JSON.stringify({ mcpServers: { other: { command: "other-cmd" } } }));
 
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { other: { command: string }; "vscode-bridge": { command: string } };
+      mcpServers: { other: { command: string }; "vscode-bridge": { url: string } };
     };
     expect(mcpJson.mcpServers.other.command).toBe("other-cmd");
-    expect(mcpJson.mcpServers["vscode-bridge"].command).toBe("node");
+    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
   });
 
   it("does not touch a file that fails to parse as JSON", async () => {
     __mockControls.setFile(mcpJsonUri, "{ not valid json");
 
-    await ensureMcpConfigured(fakeContext("/ext"), 4823, fakeOutput());
+    await ensureMcpConfigured(4824, fakeOutput());
 
     expect(__mockControls.getFile(mcpJsonUri)).toBe("{ not valid json");
   });

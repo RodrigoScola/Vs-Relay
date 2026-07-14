@@ -1,12 +1,14 @@
 import * as vscode from "vscode";
-import { DEFAULT_PORT } from "@claude-vscode/shared";
+import { DEFAULT_MCP_HTTP_PORT, DEFAULT_PORT } from "@claude-vscode/shared";
 import { BridgeServer } from "./bridgeServer";
 import { createHandlers } from "./handlers";
 import { ensureMcpConfigured } from "./mcpProvisioning";
+import { McpServerProcess } from "./mcpServerProcess";
 import { BridgeState } from "./state";
 
 let bridgeServer: BridgeServer | undefined;
 let bridgeState: BridgeState | undefined;
+let mcpServerProcess: McpServerProcess | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
 
@@ -15,18 +17,29 @@ function getPort(): number {
   return configured ?? DEFAULT_PORT;
 }
 
+function getMcpHttpPort(): number {
+  const configured = vscode.workspace.getConfiguration("claudeBridge").get<number>("mcpHttpPort");
+  return configured ?? DEFAULT_MCP_HTTP_PORT;
+}
+
 function startServer(context: vscode.ExtensionContext, output: vscode.OutputChannel): void {
   bridgeState?.dispose();
   bridgeServer?.dispose();
+  mcpServerProcess?.dispose();
 
   const state = new BridgeState();
   const handlers = createHandlers(state);
   const server = new BridgeServer(getPort(), handlers, output);
   server.start();
 
+  const bundledServerPath = context.asAbsolutePath("bundled/mcp-server.cjs");
+  const mcpProcess = new McpServerProcess(bundledServerPath, getPort(), getMcpHttpPort(), output);
+  mcpProcess.start();
+
   bridgeState = state;
   bridgeServer = server;
-  context.subscriptions.push(state, server);
+  mcpServerProcess = mcpProcess;
+  context.subscriptions.push(state, server, mcpProcess);
 
   if (statusBarItem) {
     statusBarItem.text = `$(plug) Claude Bridge :${String(getPort())}`;
@@ -45,7 +58,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   startServer(context, output);
 
-  void ensureMcpConfigured(context, getPort(), output).catch((error: unknown) => {
+  void ensureMcpConfigured(getMcpHttpPort(), output).catch((error: unknown) => {
     output.appendLine(`Failed to auto-configure MCP server entries: ${String(error)}`);
   });
 
@@ -62,7 +75,7 @@ export function activate(context: vscode.ExtensionContext): void {
       );
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("claudeBridge.port")) {
+      if (event.affectsConfiguration("claudeBridge.port") || event.affectsConfiguration("claudeBridge.mcpHttpPort")) {
         startServer(context, output);
       }
     }),
@@ -72,5 +85,6 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {
   bridgeServer?.dispose();
   bridgeState?.dispose();
+  mcpServerProcess?.dispose();
   outputChannel?.dispose();
 }

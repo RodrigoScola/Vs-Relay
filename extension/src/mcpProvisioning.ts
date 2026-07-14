@@ -34,8 +34,7 @@ async function ensureMcpEntry(
   dirUri: vscode.Uri,
   fileName: string,
   containerKey: "mcpServers" | "servers",
-  bundledServerPath: string,
-  port: number,
+  mcpHttpPort: number,
 ): Promise<EntryOutcome> {
   const fileUri = vscode.Uri.joinPath(dirUri, fileName);
   const outcome = await readJsonFile(fileUri);
@@ -54,10 +53,8 @@ async function ensureMcpEntry(
     [containerKey]: {
       ...container,
       [SERVER_KEY]: {
-        type: "stdio",
-        command: "node",
-        args: [bundledServerPath],
-        env: { CLAUDE_BRIDGE_PORT: String(port) },
+        type: "http",
+        url: `http://127.0.0.1:${String(mcpHttpPort)}/mcp`,
       },
     },
   };
@@ -67,11 +64,7 @@ async function ensureMcpEntry(
   return "created";
 }
 
-export async function ensureMcpConfigured(
-  context: vscode.ExtensionContext,
-  port: number,
-  output: vscode.OutputChannel,
-): Promise<void> {
+export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.OutputChannel): Promise<void> {
   const autoConfigure = vscode.workspace.getConfiguration("claudeBridge").get<boolean>("autoConfigureMcp");
   if (autoConfigure === false) {
     return;
@@ -82,11 +75,10 @@ export async function ensureMcpConfigured(
     return;
   }
 
-  const bundledServerPath = context.asAbsolutePath("bundled/mcp-server.cjs");
   const created: string[] = [];
 
   for (const folder of folders) {
-    const claudeCodeResult = await ensureMcpEntry(folder.uri, ".mcp.json", "mcpServers", bundledServerPath, port);
+    const claudeCodeResult = await ensureMcpEntry(folder.uri, ".mcp.json", "mcpServers", mcpHttpPort);
     if (claudeCodeResult === "created") {
       created.push(vscode.Uri.joinPath(folder.uri, ".mcp.json").fsPath);
     }
@@ -95,8 +87,7 @@ export async function ensureMcpConfigured(
       vscode.Uri.joinPath(folder.uri, ".vscode"),
       "mcp.json",
       "servers",
-      bundledServerPath,
-      port,
+      mcpHttpPort,
     );
     if (vscodeResult === "created") {
       created.push(vscode.Uri.joinPath(folder.uri, ".vscode", "mcp.json").fsPath);

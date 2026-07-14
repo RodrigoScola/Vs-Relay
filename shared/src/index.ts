@@ -1,4 +1,5 @@
 export const DEFAULT_PORT = 4823;
+export const DEFAULT_MCP_HTTP_PORT = 4824;
 export const PROTOCOL_VERSION = 1;
 
 export interface RpcRequest {
