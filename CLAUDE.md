@@ -19,4 +19,7 @@ update `mcp-server/src/instructions.test.ts` alongside it.
   keep new code passing both (`npm run build`, `npx eslint .`).
 - `test-workspace/` is a manual-testing fixture opened by the "Run Extension" launch config; it's
   excluded from lint/type-checking on purpose.
-- Run `npm test` (vitest, across all three packages) before considering a change done.
+- Run `npm test` (vitest, across all three packages) before considering a change done. This
+  workspace has no VSCode Test Explorer adapter wired up for vitest, so don't try
+  `testing.runAll` via vs-relay first — it's a known no-op here and running it plus `npm test`
+  counts as running the tests twice. Go straight to `npm test`.

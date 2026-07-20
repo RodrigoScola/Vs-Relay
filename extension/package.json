@@ -1,14 +1,9 @@
 {
   "name": "vs-relay",
-  "displayName": "VS Relay",
-  "description": "Exposes VSCode editor, file, run/debug, and UI actions over a local WebSocket for the VS Relay MCP server.",
   "version": "0.1.0",
+  "publisher": "rodrigoscola",
   "private": true,
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/RodrigoScola/Vs-Relay"
-  },
   "type": "commonjs",
   "engines": {
     "vscode": "^1.85.0"
@@ -16,6 +11,23 @@
   "categories": [
     "Other"
   ],
+  "author": {
+    "name": "Rodrigo Scola",
+    "url": "https://github.com/RodrigoScola"
+  },
+  "sponsor": {
+    "url": "https://ko-fi.com/rodrigoscola"
+  },
+  "displayName": "VS Relay",
+  "bugs": {
+    "url": "https://github.com/RodrigoScola/Vs-Relay/issues"
+  },
+  "homepage": "https://github.com/RodrigoScola/Vs-Relay",
+  "description": "Make claude control your editor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RodrigoScola/Vs-Relay"
+  },
   "keywords": [
     "mcp",
     "model context protocol",
