@@ -43,7 +43,10 @@
     "watch": "npm run build --workspace=shared && concurrently \"npm:watch --workspace=extension\" \"npm:watch --workspace=mcp-server\"",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "package:extension": "npm run package --workspace=extension",
+    "publish:extension": "npm run publish --workspace=extension",
+    "update": "npm run package:extension && npm run publish:extension"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

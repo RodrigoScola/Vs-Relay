@@ -1,6 +1,6 @@
 {
   "name": "vs-relay",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "rodrigoscola",
   "private": true,
   "license": "MIT",
@@ -80,6 +80,7 @@
     "bundle:mcp-server": "esbuild ../mcp-server/src/index.ts --bundle --platform=node --target=node18 --format=cjs --outfile=bundled/mcp-server.cjs",
     "watch": "tsc -p . --watch",
     "package": "npm run build && npx @vscode/vsce package --no-dependencies",
+    "publish": "npm run build && npx @vscode/vsce publish --no-dependencies",
     "test": "vitest run"
   },
   "dependencies": {
