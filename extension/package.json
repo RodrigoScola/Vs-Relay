@@ -4,6 +4,11 @@
   "description": "Exposes VSCode editor, file, run/debug, and UI actions over a local WebSocket for the VS Relay MCP server.",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RodrigoScola/Vs-Relay"
+  },
   "type": "commonjs",
   "engines": {
     "vscode": "^1.85.0"
