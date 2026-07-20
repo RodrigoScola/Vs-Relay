@@ -25,7 +25,7 @@
     "url": "https://github.com/RodrigoScola/Vs-Relay/issues"
   },
   "homepage": "https://github.com/RodrigoScola/Vs-Relay",
-  "description": "Make ai agents control your editor",
+  "description": "Make claude control your editor",
   "repository": {
     "type": "git",
     "url": "https://github.com/RodrigoScola/Vs-Relay"
