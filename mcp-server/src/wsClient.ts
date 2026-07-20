@@ -88,8 +88,8 @@ export class BridgeClient {
         socket.terminate();
         reject(
           new Error(
-            `Could not connect to the Claude VSCode Bridge extension at ${this.url}. ` +
-              "Make sure VSCode is open with the Claude VSCode Bridge extension installed and active.",
+            `Could not connect to the VS Relay extension at ${this.url}. ` +
+              "Make sure VSCode is open with the VS Relay extension installed and active.",
           ),
         );
       }, CONNECT_TIMEOUT_MS);

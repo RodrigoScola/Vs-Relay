@@ -18,7 +18,7 @@
       "outFiles": ["${workspaceFolder}/mcp-server/dist/**/*.js", "${workspaceFolder}/shared/dist/**/*.js"],
       "preLaunchTask": "build",
       "console": "integratedTerminal",
-      "env": { "CLAUDE_BRIDGE_PORT": "4823" },
+      "env": { "VS_RELAY_PORT": "4823" },
       "skipFiles": ["<node_internals>/**"]
     },
     {

@@ -1,4 +1,4 @@
-# Claude VSCode Bridge
+# VS Relay
 
 Lets Claude (via MCP) drive a running VSCode instance: read editor/diagnostic state,
 open and edit files, run tasks and debug sessions, and trigger UI actions.
@@ -11,7 +11,7 @@ Claude  <--stdio (MCP)-->  mcp-server  <--WebSocket (localhost)-->  extension  <
 
 - **`shared/`** — protocol types shared by both sides (`RpcRequest`/`RpcResponse`, method table).
 - **`extension/`** — a VSCode extension. On activation it starts a WebSocket server on
-  `127.0.0.1:4823` (configurable via `claudeBridge.port`) and answers RPC calls using the
+  `127.0.0.1:4823` (configurable via `vsRelay.port`) and answers RPC calls using the
   VSCode API.
 - **`mcp-server/`** — a standalone MCP server (stdio transport) that connects to the extension's
   WebSocket server and exposes each bridge method as an MCP tool (`vscode_get_open_files`,
@@ -24,12 +24,12 @@ can do anything — it's a thin client that fails fast with a clear error if it 
 **The extension is self-contained.** At build time, `extension`'s build script bundles all of
 `mcp-server` (via esbuild, into `extension/bundled/mcp-server.cjs`) so the packaged `.vsix` doesn't
 depend on a separate `npm install`/build of `mcp-server` — it's just `node` + one file. On
-activation, the extension automatically adds a `vscode-bridge` entry (pointing at that bundled
+activation, the extension automatically adds a `vs-relay` entry (pointing at that bundled
 file) to `.mcp.json` (Claude Code CLI) and `.vscode/mcp.json` (VSCode's own MCP support, e.g.
 Copilot) in every open workspace folder, if one isn't already present — so installing the
 extension is normally the *only* setup step; there is nothing to configure by hand. It never
-overwrites an existing `vscode-bridge` entry or touches a file it can't parse. Disable this with
-`"claudeBridge.autoConfigureMcp": false`.
+overwrites an existing `vs-relay` entry or touches a file it can't parse. Disable this with
+`"vsRelay.autoConfigureMcp": false`.
 
 ## Setup
 
@@ -48,13 +48,13 @@ npm workspaces).
    pre-loaded with [`test-workspace/`](test-workspace) — a small scratch folder with a sample
    file and a sample task. `test-workspace/.vscode/mcp.json` was created manually before
    auto-provisioning existed and points at the dev-mode `mcp-server/dist/index.js`; the
-   auto-provisioning feature described above only fills in a `vscode-bridge` entry when one is
-   *missing*, so it leaves that file alone. Check the extension's status bar item or the "Claude
-   VSCode Bridge" output channel to confirm it's listening, then use the MCP/Tools view in that
-   window (or Copilot Chat's MCP picker) to start the `vscode-bridge` server and try a tool
+   auto-provisioning feature described above only fills in a `vs-relay` entry when one is
+   *missing*, so it leaves that file alone. Check the extension's status bar item or the "VS
+   Relay" output channel to confirm it's listening, then use the MCP/Tools view in that
+   window (or Copilot Chat's MCP picker) to start the `vs-relay` server and try a tool
    against `test-workspace/src/sample.ts`.
 2. **Point an MCP client at the server.** This repo's root already has [`.mcp.json`](.mcp.json)
-   configuring `vscode-bridge` for the **Claude Code CLI** — restart Claude Code (or start a fresh
+   configuring `vs-relay` for the **Claude Code CLI** — restart Claude Code (or start a fresh
    session) in this directory and it'll show up under `/mcp` (it'll ask for a one-time trust
    approval for the project-scoped server). Note this is a *different* file/format from
    `test-workspace/.vscode/mcp.json`, which is VSCode's own built-in MCP config (used by e.g.
@@ -64,7 +64,7 @@ npm workspaces).
    ```json
    {
      "mcpServers": {
-       "vscode-bridge": {
+       "vs-relay": {
          "command": "node",
          "args": ["/absolute/path/to/mcp/mcp-server/dist/index.js"]
        }
@@ -72,8 +72,8 @@ npm workspaces).
    }
    ```
 
-   The server connects to `ws://127.0.0.1:4823` by default; override with the `CLAUDE_BRIDGE_PORT`
-   env var if you changed `claudeBridge.port`. Either way, the extension (step 1) must already be
+   The server connects to `ws://127.0.0.1:4823` by default; override with the `VS_RELAY_PORT`
+   env var if you changed `vsRelay.port`. Either way, the extension (step 1) must already be
    running or the tool calls will fail with a clear "could not connect" error.
 
 ### Testing without a full MCP client

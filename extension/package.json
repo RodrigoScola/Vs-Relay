@@ -1,7 +1,7 @@
 {
-  "name": "claude-vscode-bridge",
-  "displayName": "Claude VSCode Bridge",
-  "description": "Exposes VSCode editor, file, run/debug, and UI actions over a local WebSocket for the Claude VSCode Bridge MCP server.",
+  "name": "vs-relay",
+  "displayName": "VS Relay",
+  "description": "Exposes VSCode editor, file, run/debug, and UI actions over a local WebSocket for the VS Relay MCP server.",
   "version": "0.1.0",
   "private": true,
   "type": "commonjs",
@@ -11,6 +11,16 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "claude",
+    "claude code",
+    "ai agent",
+    "llm",
+    "automation",
+    "copilot"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -18,31 +28,31 @@
   "contributes": {
     "commands": [
       {
-        "command": "claudeBridge.restart",
-        "title": "Claude Bridge: Restart Server"
+        "command": "vsRelay.restart",
+        "title": "VS Relay: Restart Server"
       },
       {
-        "command": "claudeBridge.showStatus",
-        "title": "Claude Bridge: Show Status"
+        "command": "vsRelay.showStatus",
+        "title": "VS Relay: Show Status"
       }
     ],
     "configuration": {
-      "title": "Claude VSCode Bridge",
+      "title": "VS Relay",
       "properties": {
-        "claudeBridge.port": {
+        "vsRelay.port": {
           "type": "number",
           "default": 4823,
           "description": "Port the bridge WebSocket server listens on."
         },
-        "claudeBridge.mcpHttpPort": {
+        "vsRelay.mcpHttpPort": {
           "type": "number",
           "default": 4824,
           "description": "Port the bundled MCP server's HTTP endpoint listens on. The extension spawns this server on activation."
         },
-        "claudeBridge.autoConfigureMcp": {
+        "vsRelay.autoConfigureMcp": {
           "type": "boolean",
           "default": true,
-          "description": "On activation, automatically add a \"vscode-bridge\" MCP server entry to .mcp.json and .vscode/mcp.json in each open workspace folder if one isn't already present, pointing at this extension's bundled MCP server."
+          "description": "On activation, automatically add a \"vs-relay\" MCP server entry to .mcp.json and .vscode/mcp.json in each open workspace folder if one isn't already present, pointing at this extension's bundled MCP server."
         }
       }
     }

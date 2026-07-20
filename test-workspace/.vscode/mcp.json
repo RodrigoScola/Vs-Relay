@@ -1,11 +1,11 @@
 {
   "servers": {
-    "vscode-bridge": {
+    "vs-relay": {
       "type": "stdio",
       "command": "node",
       "args": ["${workspaceFolder}/../mcp-server/dist/index.js"],
       "env": {
-        "CLAUDE_BRIDGE_PORT": "4823"
+        "VS_RELAY_PORT": "4823"
       }
     }
   }

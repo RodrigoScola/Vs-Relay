@@ -23,40 +23,40 @@ describe("ensureMcpConfigured", () => {
     expect(__mockControls.getFile(mcpJsonUri)).toBeUndefined();
   });
 
-  it("does nothing when claudeBridge.autoConfigureMcp is disabled", async () => {
+  it("does nothing when vsRelay.autoConfigureMcp is disabled", async () => {
     __mockControls.setConfig({ autoConfigureMcp: false });
     await ensureMcpConfigured(4824, fakeOutput());
     expect(__mockControls.getFile(mcpJsonUri)).toBeUndefined();
   });
 
-  it("creates .mcp.json and .vscode/mcp.json with a vscode-bridge entry when missing", async () => {
+  it("creates .mcp.json and .vscode/mcp.json with a vs-relay entry when missing", async () => {
     await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { "vscode-bridge": { type: string; url: string } };
+      mcpServers: { "vs-relay": { type: string; url: string } };
     };
-    expect(mcpJson.mcpServers["vscode-bridge"].type).toBe("http");
-    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
+    expect(mcpJson.mcpServers["vs-relay"].type).toBe("http");
+    expect(mcpJson.mcpServers["vs-relay"].url).toBe("http://127.0.0.1:4824/mcp");
 
     const vscodeMcpJson = JSON.parse(__mockControls.getFile(vscodeMcpJsonUri) ?? "{}") as {
-      servers: { "vscode-bridge": { type: string; url: string } };
+      servers: { "vs-relay": { type: string; url: string } };
     };
-    expect(vscodeMcpJson.servers["vscode-bridge"].type).toBe("http");
-    expect(vscodeMcpJson.servers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
+    expect(vscodeMcpJson.servers["vs-relay"].type).toBe("http");
+    expect(vscodeMcpJson.servers["vs-relay"].url).toBe("http://127.0.0.1:4824/mcp");
   });
 
-  it("does not overwrite an existing vscode-bridge entry", async () => {
+  it("does not overwrite an existing vs-relay entry", async () => {
     __mockControls.setFile(
       mcpJsonUri,
-      JSON.stringify({ mcpServers: { "vscode-bridge": { type: "http", url: "http://custom/mcp" } } }),
+      JSON.stringify({ mcpServers: { "vs-relay": { type: "http", url: "http://custom/mcp" } } }),
     );
 
     await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { "vscode-bridge": { url: string } };
+      mcpServers: { "vs-relay": { url: string } };
     };
-    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://custom/mcp");
+    expect(mcpJson.mcpServers["vs-relay"].url).toBe("http://custom/mcp");
   });
 
   it("preserves other entries already in the file", async () => {
@@ -65,10 +65,10 @@ describe("ensureMcpConfigured", () => {
     await ensureMcpConfigured(4824, fakeOutput());
 
     const mcpJson = JSON.parse(__mockControls.getFile(mcpJsonUri) ?? "{}") as {
-      mcpServers: { other: { command: string }; "vscode-bridge": { url: string } };
+      mcpServers: { other: { command: string }; "vs-relay": { url: string } };
     };
     expect(mcpJson.mcpServers.other.command).toBe("other-cmd");
-    expect(mcpJson.mcpServers["vscode-bridge"].url).toBe("http://127.0.0.1:4824/mcp");
+    expect(mcpJson.mcpServers["vs-relay"].url).toBe("http://127.0.0.1:4824/mcp");
   });
 
   it("does not touch a file that fails to parse as JSON", async () => {

@@ -313,7 +313,7 @@ export function createHandlers(state: BridgeState): Handlers {
     },
 
     "terminal/run": async (params) => {
-      const name = params.name ?? "Claude Bridge";
+      const name = params.name ?? "VS Relay";
       let terminal = vscode.window.terminals.find((candidate) => candidate.name === name);
       terminal ??= vscode.window.createTerminal(name);
       terminal.show();

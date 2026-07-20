@@ -277,7 +277,7 @@ export function registerTools(server: McpServer, client: BridgeClient): void {
       description:
         "Run a shell command in an integrated terminal (creates it if needed). Output is captured when shell integration is available.",
       inputSchema: {
-        name: z.string().optional().describe('Terminal name to reuse or create. Defaults to "Claude Bridge".'),
+        name: z.string().optional().describe('Terminal name to reuse or create. Defaults to "VS Relay".'),
         command: z.string().describe("Shell command to run"),
       },
     },

@@ -1,12 +1,43 @@
 {
-  "name": "claude-vscode-bridge",
-  "private": true,
+  "name": "vs-relay",
+  "private": false,
   "version": "0.1.0",
+  "publisher": "rodrigoscola",
+  "author": {
+    "name": "Rodrigo Scola",
+    "url": "https://github.com/RodrigoScola"
+  },
+  "sponsor": {
+    "url": "https://ko-fi.com/rodrigoscola"
+  },
+  "displayName": "VS Relay",
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "claude",
+    "claude code",
+    "ai agent",
+    "llm",
+    "automation",
+    "copilot"
+  ],
+  "bugs": {
+    "url": "https://github.com/RodrigoScola/Vs-Relay/issues"
+  },
+  "homepage": "https://github.com/RodrigoScola/Vs-Relay",
+  "description": "Make ai agents control your editor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RodrigoScola/Vs-Relay"
+  },
   "workspaces": [
     "shared",
     "extension",
     "mcp-server"
   ],
+  "engines": {
+    "vscode": "^1.93.0"
+  },
   "scripts": {
     "build": "npm run build --workspace=shared && npm run build --workspace=extension && npm run build --workspace=mcp-server",
     "watch": "npm run build --workspace=shared && concurrently \"npm:watch --workspace=extension\" \"npm:watch --workspace=mcp-server\"",

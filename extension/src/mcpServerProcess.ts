@@ -15,8 +15,8 @@ export class McpServerProcess implements vscode.Disposable {
     const child = spawn(process.execPath, [this.bundledServerPath], {
       env: {
         ...process.env,
-        CLAUDE_BRIDGE_PORT: String(this.bridgePort),
-        CLAUDE_MCP_HTTP_PORT: String(this.mcpHttpPort),
+        VS_RELAY_PORT: String(this.bridgePort),
+        VS_RELAY_MCP_HTTP_PORT: String(this.mcpHttpPort),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });

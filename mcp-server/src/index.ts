@@ -40,15 +40,15 @@ function sendJsonRpcError(res: ServerResponse, status: number, message: string):
 }
 
 async function main(): Promise<void> {
-  const bridgePort = resolvePort("CLAUDE_BRIDGE_PORT", DEFAULT_PORT);
-  const httpPort = resolvePort("CLAUDE_MCP_HTTP_PORT", DEFAULT_MCP_HTTP_PORT);
+  const bridgePort = resolvePort("VS_RELAY_PORT", DEFAULT_PORT);
+  const httpPort = resolvePort("VS_RELAY_MCP_HTTP_PORT", DEFAULT_MCP_HTTP_PORT);
   const client = new BridgeClient(`ws://127.0.0.1:${String(bridgePort)}`);
 
   const transports = new Map<string, StreamableHTTPServerTransport>();
 
   function createSession(): StreamableHTTPServerTransport {
     const server = new McpServer(
-      { name: "claude-vscode-bridge", version: "0.1.0" },
+      { name: "vs-relay", version: "0.1.0" },
       { instructions: SERVER_INSTRUCTIONS },
     );
     registerTools(server, client);
@@ -110,11 +110,11 @@ async function main(): Promise<void> {
   });
 
   httpServer.listen(httpPort, "127.0.0.1", () => {
-    console.error(`Claude VSCode Bridge MCP server listening on http://127.0.0.1:${String(httpPort)}/mcp`);
+    console.error(`VS Relay MCP server listening on http://127.0.0.1:${String(httpPort)}/mcp`);
   });
 }
 
 main().catch((error: unknown) => {
-  console.error("Fatal error starting Claude VSCode Bridge MCP server:", error);
+  console.error("Fatal error starting VS Relay MCP server:", error);
   process.exit(1);
 });

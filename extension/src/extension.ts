@@ -13,12 +13,12 @@ let statusBarItem: vscode.StatusBarItem | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
 
 function getPort(): number {
-  const configured = vscode.workspace.getConfiguration("claudeBridge").get<number>("port");
+  const configured = vscode.workspace.getConfiguration("vsRelay").get<number>("port");
   return configured ?? DEFAULT_PORT;
 }
 
 function getMcpHttpPort(): number {
-  const configured = vscode.workspace.getConfiguration("claudeBridge").get<number>("mcpHttpPort");
+  const configured = vscode.workspace.getConfiguration("vsRelay").get<number>("mcpHttpPort");
   return configured ?? DEFAULT_MCP_HTTP_PORT;
 }
 
@@ -42,17 +42,17 @@ function startServer(context: vscode.ExtensionContext, output: vscode.OutputChan
   context.subscriptions.push(state, server, mcpProcess);
 
   if (statusBarItem) {
-    statusBarItem.text = `$(plug) Claude Bridge :${String(getPort())}`;
+    statusBarItem.text = `$(plug) VS Relay :${String(getPort())}`;
   }
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const output = vscode.window.createOutputChannel("Claude VSCode Bridge");
+  const output = vscode.window.createOutputChannel("VS Relay");
   outputChannel = output;
   context.subscriptions.push(output);
 
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-  statusBarItem.command = "claudeBridge.showStatus";
+  statusBarItem.command = "vsRelay.showStatus";
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
 
@@ -63,19 +63,19 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("claudeBridge.restart", () => {
+    vscode.commands.registerCommand("vsRelay.restart", () => {
       startServer(context, output);
-      void vscode.window.showInformationMessage(`Claude Bridge restarted on port ${String(getPort())}.`);
+      void vscode.window.showInformationMessage(`VS Relay restarted on port ${String(getPort())}.`);
     }),
-    vscode.commands.registerCommand("claudeBridge.showStatus", () => {
+    vscode.commands.registerCommand("vsRelay.showStatus", () => {
       output.show();
       const clientCount = bridgeServer?.clientCount ?? 0;
       void vscode.window.showInformationMessage(
-        `Claude Bridge listening on port ${String(getPort())}. Connected clients: ${String(clientCount)}.`,
+        `VS Relay listening on port ${String(getPort())}. Connected clients: ${String(clientCount)}.`,
       );
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("claudeBridge.port") || event.affectsConfiguration("claudeBridge.mcpHttpPort")) {
+      if (event.affectsConfiguration("vsRelay.port") || event.affectsConfiguration("vsRelay.mcpHttpPort")) {
         startServer(context, output);
       }
     }),

@@ -1,8 +1,8 @@
-# Claude VSCode Bridge
+# VS Relay
 
 ## Where user-facing tool guidance lives
 
-Guidance on *how to use* the `vscode-bridge` MCP tools (testing workflow, preferring
+Guidance on *how to use* the `vs-relay` MCP tools (testing workflow, preferring
 focus-bringing actions, command discovery) lives in
 [`mcp-server/src/instructions.ts`](mcp-server/src/instructions.ts) — it's sent to every MCP client
 as the server's `instructions` field during the `initialize` handshake (see the MCP spec /

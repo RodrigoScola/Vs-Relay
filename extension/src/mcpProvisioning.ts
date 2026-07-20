@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-const SERVER_KEY = "vscode-bridge";
+const SERVER_KEY = "vs-relay";
 
 type ReadOutcome =
   | { kind: "missing" }
@@ -65,7 +65,7 @@ async function ensureMcpEntry(
 }
 
 export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.OutputChannel): Promise<void> {
-  const autoConfigure = vscode.workspace.getConfiguration("claudeBridge").get<boolean>("autoConfigureMcp");
+  const autoConfigure = vscode.workspace.getConfiguration("vsRelay").get<boolean>("autoConfigureMcp");
   if (autoConfigure === false) {
     return;
   }
@@ -100,7 +100,7 @@ export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.Ou
 
   output.appendLine(`Configured MCP server entries in:\n${created.join("\n")}`);
   const selection = await vscode.window.showInformationMessage(
-    `Claude VSCode Bridge: added MCP server config to ${String(created.length)} file(s). ` +
+    `VS Relay: added MCP server config to ${String(created.length)} file(s). ` +
       "Restart your MCP client (e.g. Claude Code) to connect.",
     "Show Output",
   );
