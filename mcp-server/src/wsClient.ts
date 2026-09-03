@@ -1,6 +1,13 @@
 import { WebSocket } from "ws";
 import type { RawData } from "ws";
-import type { HelloMessage, MethodName, MethodParams, MethodResult, RpcRequest, RpcResponse } from "@claude-vscode/shared";
+import type {
+  HelloMessage,
+  MethodName,
+  MethodParams,
+  MethodResult,
+  RpcRequest,
+  RpcResponse,
+} from "@agents-vscode/shared";
 
 const REQUEST_TIMEOUT_MS = 15_000;
 const CONNECT_TIMEOUT_MS = 5_000;
@@ -47,12 +54,17 @@ export class BridgeClient {
   async getHello(): Promise<HelloMessage> {
     await this.ensureConnected();
     if (!this.hello) {
-      throw new Error("Connected to the bridge but did not receive a hello message.");
+      throw new Error(
+        "Connected to the bridge but did not receive a hello message.",
+      );
     }
     return this.hello;
   }
 
-  async call<M extends MethodName>(method: M, params: MethodParams<M>): Promise<MethodResult<M>> {
+  async call<M extends MethodName>(
+    method: M,
+    params: MethodParams<M>,
+  ): Promise<MethodResult<M>> {
     await this.ensureConnected();
     const socket = this.socket;
     if (!socket) {
@@ -65,7 +77,11 @@ export class BridgeClient {
     const resultPromise = new Promise<unknown>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error(`Request "${method}" timed out after ${String(REQUEST_TIMEOUT_MS)}ms.`));
+        reject(
+          new Error(
+            `Request "${method}" timed out after ${String(REQUEST_TIMEOUT_MS)}ms.`,
+          ),
+        );
       }, REQUEST_TIMEOUT_MS);
       this.pending.set(id, { resolve, reject, timeout });
     });

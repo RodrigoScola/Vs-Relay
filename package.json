@@ -1,7 +1,7 @@
 {
   "name": "vs-relay",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "rodrigoscola",
   "author": {
     "name": "Rodrigo Scola",
@@ -14,8 +14,8 @@
   "keywords": [
     "mcp",
     "model context protocol",
-    "claude",
-    "claude code",
+    "agents",
+    "agent clients",
     "ai agent",
     "llm",
     "automation",
@@ -25,7 +25,7 @@
     "url": "https://github.com/RodrigoScola/Vs-Relay/issues"
   },
   "homepage": "https://github.com/RodrigoScola/Vs-Relay",
-  "description": "Make claude control your editor",
+  "description": "Make agents control your editor",
   "repository": {
     "type": "git",
     "url": "https://github.com/RodrigoScola/Vs-Relay"

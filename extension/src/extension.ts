@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { DEFAULT_MCP_HTTP_PORT, DEFAULT_PORT } from "@claude-vscode/shared";
+import { DEFAULT_MCP_HTTP_PORT, DEFAULT_PORT } from "@agents-vscode/shared";
 import { BridgeServer } from "./bridgeServer";
 import { createHandlers } from "./handlers";
 import { ensureMcpConfigured } from "./mcpProvisioning";
@@ -13,16 +13,23 @@ let statusBarItem: vscode.StatusBarItem | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
 
 function getPort(): number {
-  const configured = vscode.workspace.getConfiguration("vsRelay").get<number>("port");
+  const configured = vscode.workspace
+    .getConfiguration("vsRelay")
+    .get<number>("port");
   return configured ?? DEFAULT_PORT;
 }
 
 function getMcpHttpPort(): number {
-  const configured = vscode.workspace.getConfiguration("vsRelay").get<number>("mcpHttpPort");
+  const configured = vscode.workspace
+    .getConfiguration("vsRelay")
+    .get<number>("mcpHttpPort");
   return configured ?? DEFAULT_MCP_HTTP_PORT;
 }
 
-function startServer(context: vscode.ExtensionContext, output: vscode.OutputChannel): void {
+function startServer(
+  context: vscode.ExtensionContext,
+  output: vscode.OutputChannel,
+): void {
   bridgeState?.dispose();
   bridgeServer?.dispose();
   mcpServerProcess?.dispose();
@@ -33,7 +40,12 @@ function startServer(context: vscode.ExtensionContext, output: vscode.OutputChan
   server.start();
 
   const bundledServerPath = context.asAbsolutePath("bundled/mcp-server.cjs");
-  const mcpProcess = new McpServerProcess(bundledServerPath, getPort(), getMcpHttpPort(), output);
+  const mcpProcess = new McpServerProcess(
+    bundledServerPath,
+    getPort(),
+    getMcpHttpPort(),
+    output,
+  );
   mcpProcess.start();
 
   bridgeState = state;
@@ -51,7 +63,10 @@ export function activate(context: vscode.ExtensionContext): void {
   outputChannel = output;
   context.subscriptions.push(output);
 
-  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  );
   statusBarItem.command = "vsRelay.showStatus";
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
@@ -59,13 +74,17 @@ export function activate(context: vscode.ExtensionContext): void {
   startServer(context, output);
 
   void ensureMcpConfigured(getMcpHttpPort(), output).catch((error: unknown) => {
-    output.appendLine(`Failed to auto-configure MCP server entries: ${String(error)}`);
+    output.appendLine(
+      `Failed to auto-configure MCP server entries: ${String(error)}`,
+    );
   });
 
   context.subscriptions.push(
     vscode.commands.registerCommand("vsRelay.restart", () => {
       startServer(context, output);
-      void vscode.window.showInformationMessage(`VS Relay restarted on port ${String(getPort())}.`);
+      void vscode.window.showInformationMessage(
+        `VS Relay restarted on port ${String(getPort())}.`,
+      );
     }),
     vscode.commands.registerCommand("vsRelay.showStatus", () => {
       output.show();
@@ -75,7 +94,10 @@ export function activate(context: vscode.ExtensionContext): void {
       );
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("vsRelay.port") || event.affectsConfiguration("vsRelay.mcpHttpPort")) {
+      if (
+        event.affectsConfiguration("vsRelay.port") ||
+        event.affectsConfiguration("vsRelay.mcpHttpPort")
+      ) {
         startServer(context, output);
       }
     }),

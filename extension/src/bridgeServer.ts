@@ -1,8 +1,13 @@
 import * as vscode from "vscode";
 import type { RawData, WebSocket } from "ws";
 import { WebSocketServer } from "ws";
-import type { HelloMessage, MethodName, RpcRequest, RpcResponse } from "@claude-vscode/shared";
-import { PROTOCOL_VERSION } from "@claude-vscode/shared";
+import type {
+  HelloMessage,
+  MethodName,
+  RpcRequest,
+  RpcResponse,
+} from "@agents-vscode/shared";
+import { PROTOCOL_VERSION } from "@agents-vscode/shared";
 import type { Handlers } from "./handlers";
 
 function rawDataToString(data: RawData): string {
@@ -20,7 +25,9 @@ function isRpcRequest(value: unknown): value is RpcRequest {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return typeof record["id"] === "string" && typeof record["method"] === "string";
+  return (
+    typeof record["id"] === "string" && typeof record["method"] === "string"
+  );
 }
 
 export class BridgeServer implements vscode.Disposable {
@@ -43,7 +50,9 @@ export class BridgeServer implements vscode.Disposable {
       const hello: HelloMessage = {
         type: "hello",
         protocolVersion: PROTOCOL_VERSION,
-        workspaceFolders: (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath),
+        workspaceFolders: (vscode.workspace.workspaceFolders ?? []).map(
+          (folder) => folder.uri.fsPath,
+        ),
       };
       const workspaceName = vscode.workspace.name;
       if (workspaceName !== undefined) {
@@ -69,7 +78,9 @@ export class BridgeServer implements vscode.Disposable {
       this.output.appendLine(`Server error: ${String(error)}`);
     });
 
-    this.output.appendLine(`Bridge server listening on ws://127.0.0.1:${String(this.port)}`);
+    this.output.appendLine(
+      `Bridge server listening on ws://127.0.0.1:${String(this.port)}`,
+    );
   }
 
   private async handleMessage(socket: WebSocket, raw: string): Promise<void> {
@@ -82,7 +93,9 @@ export class BridgeServer implements vscode.Disposable {
     }
 
     if (!isRpcRequest(parsed)) {
-      this.output.appendLine("Received a message that is not a valid RPC request.");
+      this.output.appendLine(
+        "Received a message that is not a valid RPC request.",
+      );
       return;
     }
 
@@ -92,10 +105,15 @@ export class BridgeServer implements vscode.Disposable {
 
   private async dispatch(request: RpcRequest): Promise<RpcResponse> {
     const method = request.method as MethodName;
-    const handler = this.handlers[method] as ((params: unknown) => Promise<unknown>) | undefined;
+    const handler = this.handlers[method] as
+      | ((params: unknown) => Promise<unknown>)
+      | undefined;
 
     if (!handler) {
-      return { id: request.id, error: { message: `Unknown method: ${request.method}` } };
+      return {
+        id: request.id,
+        error: { message: `Unknown method: ${request.method}` },
+      };
     }
 
     try {

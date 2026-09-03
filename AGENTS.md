@@ -2,13 +2,13 @@
 
 ## Where user-facing tool guidance lives
 
-Guidance on *how to use* the `vs-relay` MCP tools (testing workflow, preferring
+Guidance on _how to use_ the `vs-relay` MCP tools (testing workflow, preferring
 focus-bringing actions, command discovery) lives in
 [`mcp-server/src/instructions.ts`](mcp-server/src/instructions.ts) — it's sent to every MCP client
 as the server's `instructions` field during the `initialize` handshake (see the MCP spec /
 `ServerOptions.instructions`). That reaches **everyone who uses the built extension**, in any
 project, on any machine — not just sessions that happen to have this repo open. This file
-(`CLAUDE.md`) only reaches Claude Code sessions working *on this repo's source*, which is a much
+(`AGENTS.md`) only reaches agent sessions working _on this repo's source_, which is a much
 narrower audience, so don't put end-user tool guidance here — put it in `instructions.ts` and
 update `mcp-server/src/instructions.test.ts` alongside it.
 

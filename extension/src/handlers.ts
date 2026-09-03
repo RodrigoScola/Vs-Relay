@@ -11,8 +11,14 @@ import type {
   TaskInfo,
   TerminalInfo,
   TextEditOp,
-} from "@claude-vscode/shared";
-import { resolveUri, severityToString, toSharedRange, toVscodePosition, toVscodeRange } from "./convert";
+} from "@agents-vscode/shared";
+import {
+  resolveUri,
+  severityToString,
+  toSharedRange,
+  toVscodePosition,
+  toVscodeRange,
+} from "./convert";
 import type { BridgeState } from "./state";
 
 export type Handlers = {
@@ -29,10 +35,15 @@ function requireActiveEditor(): vscode.TextEditor {
 
 function findEditorForPath(path: string): vscode.TextEditor | undefined {
   const uri = resolveUri(path);
-  return vscode.window.visibleTextEditors.find((editor) => editor.document.uri.fsPath === uri.fsPath);
+  return vscode.window.visibleTextEditors.find(
+    (editor) => editor.document.uri.fsPath === uri.fsPath,
+  );
 }
 
-function toOpenFileInfo(document: vscode.TextDocument, activeUri: vscode.Uri | undefined): OpenFileInfo {
+function toOpenFileInfo(
+  document: vscode.TextDocument,
+  activeUri: vscode.Uri | undefined,
+): OpenFileInfo {
   return {
     path: document.uri.fsPath,
     languageId: document.languageId,
@@ -41,7 +52,10 @@ function toOpenFileInfo(document: vscode.TextDocument, activeUri: vscode.Uri | u
   };
 }
 
-function diagnosticsForEntry(uri: vscode.Uri, diagnostics: readonly vscode.Diagnostic[]): DiagnosticInfo[] {
+function diagnosticsForEntry(
+  uri: vscode.Uri,
+  diagnostics: readonly vscode.Diagnostic[],
+): DiagnosticInfo[] {
   return diagnostics.map((diagnostic) => {
     const info: DiagnosticInfo = {
       path: uri.fsPath,
@@ -53,14 +67,19 @@ function diagnosticsForEntry(uri: vscode.Uri, diagnostics: readonly vscode.Diagn
       info.source = diagnostic.source;
     }
     if (diagnostic.code !== undefined) {
-      info.code = typeof diagnostic.code === "object" ? diagnostic.code.value : diagnostic.code;
+      info.code =
+        typeof diagnostic.code === "object"
+          ? diagnostic.code.value
+          : diagnostic.code;
     }
     return info;
   });
 }
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function titleFromContribution(rawTitle: unknown): string | undefined {
@@ -72,8 +91,12 @@ function titleFromContribution(rawTitle: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function commandsFromExtension(extension: vscode.Extension<unknown>): CommandInfo[] {
-  const contributes = asRecord(asRecord(extension.packageJSON)?.["contributes"]);
+function commandsFromExtension(
+  extension: vscode.Extension<unknown>,
+): CommandInfo[] {
+  const contributes = asRecord(
+    asRecord(extension.packageJSON)?.["contributes"],
+  );
   const rawCommands = contributes?.["commands"];
   if (!Array.isArray(rawCommands)) {
     return [];
@@ -104,7 +127,8 @@ function commandsFromExtension(extension: vscode.Extension<unknown>): CommandInf
 }
 
 function matchesQuery(command: CommandInfo, query: string): boolean {
-  const haystack = `${command.id} ${command.title ?? ""} ${command.category ?? ""}`.toLowerCase();
+  const haystack =
+    `${command.id} ${command.title ?? ""} ${command.category ?? ""}`.toLowerCase();
   return haystack.includes(query.toLowerCase());
 }
 
@@ -127,21 +151,33 @@ export function createHandlers(state: BridgeState): Handlers {
     },
 
     "editor/getSelection": async (params) => {
-      const editor = params.path !== undefined ? findEditorForPath(params.path) : vscode.window.activeTextEditor;
+      const editor =
+        params.path !== undefined
+          ? findEditorForPath(params.path)
+          : vscode.window.activeTextEditor;
       if (!editor) {
         return null;
       }
       return {
         path: editor.document.uri.fsPath,
-        selections: editor.selections.map((selection) => toSharedRange(selection)),
-        selectedText: editor.selections.map((selection) => editor.document.getText(selection)),
+        selections: editor.selections.map((selection) =>
+          toSharedRange(selection),
+        ),
+        selectedText: editor.selections.map((selection) =>
+          editor.document.getText(selection),
+        ),
       };
     },
 
     "editor/getDiagnostics": async (params) => {
       if (params.path !== undefined) {
         const uri = resolveUri(params.path);
-        return { diagnostics: diagnosticsForEntry(uri, vscode.languages.getDiagnostics(uri)) };
+        return {
+          diagnostics: diagnosticsForEntry(
+            uri,
+            vscode.languages.getDiagnostics(uri),
+          ),
+        };
       }
       const all = vscode.languages.getDiagnostics();
       const diagnostics: DiagnosticInfo[] = [];
@@ -152,10 +188,9 @@ export function createHandlers(state: BridgeState): Handlers {
     },
 
     "editor/getWorkspaceSymbols": async (params) => {
-      const results = await vscode.commands.executeCommand<vscode.SymbolInformation[] | undefined>(
-        "vscode.executeWorkspaceSymbolProvider",
-        params.query,
-      );
+      const results = await vscode.commands.executeCommand<
+        vscode.SymbolInformation[] | undefined
+      >("vscode.executeWorkspaceSymbolProvider", params.query);
       const symbols: SymbolInfo[] = (results ?? []).map((symbol) => {
         const info: SymbolInfo = {
           name: symbol.name,
@@ -179,7 +214,9 @@ export function createHandlers(state: BridgeState): Handlers {
 
     "file/open": async (params) => {
       const uri = resolveUri(params.path);
-      await vscode.window.showTextDocument(uri, { preview: params.preview ?? false });
+      await vscode.window.showTextDocument(uri, {
+        preview: params.preview ?? false,
+      });
       return { opened: true };
     },
 
@@ -189,7 +226,9 @@ export function createHandlers(state: BridgeState): Handlers {
       const edits: TextEditOp[] = params.edits;
       workspaceEdit.set(
         uri,
-        edits.map((edit) => vscode.TextEdit.replace(toVscodeRange(edit.range), edit.newText)),
+        edits.map((edit) =>
+          vscode.TextEdit.replace(toVscodeRange(edit.range), edit.newText),
+        ),
       );
       const applied = await vscode.workspace.applyEdit(workspaceEdit);
       return { applied };
@@ -207,20 +246,28 @@ export function createHandlers(state: BridgeState): Handlers {
           }
         }
       }
-      await vscode.workspace.fs.writeFile(uri, Buffer.from(params.content ?? "", "utf8"));
+      await vscode.workspace.fs.writeFile(
+        uri,
+        Buffer.from(params.content ?? "", "utf8"),
+      );
       return { created: true };
     },
 
     "file/delete": async (params) => {
       const uri = resolveUri(params.path);
-      await vscode.workspace.fs.delete(uri, { useTrash: params.useTrash ?? true, recursive: true });
+      await vscode.workspace.fs.delete(uri, {
+        useTrash: params.useTrash ?? true,
+        recursive: true,
+      });
       return { deleted: true };
     },
 
     "file/rename": async (params) => {
       const oldUri = resolveUri(params.oldPath);
       const newUri = resolveUri(params.newPath);
-      await vscode.workspace.fs.rename(oldUri, newUri, { overwrite: params.overwrite ?? false });
+      await vscode.workspace.fs.rename(oldUri, newUri, {
+        overwrite: params.overwrite ?? false,
+      });
       return { renamed: true };
     },
 
@@ -229,7 +276,10 @@ export function createHandlers(state: BridgeState): Handlers {
       const editor = await vscode.window.showTextDocument(uri);
       const position = toVscodePosition(params.position);
       editor.selection = new vscode.Selection(position, position);
-      editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+      editor.revealRange(
+        new vscode.Range(position, position),
+        vscode.TextEditorRevealType.InCenter,
+      );
       return { moved: true };
     },
 
@@ -259,15 +309,22 @@ export function createHandlers(state: BridgeState): Handlers {
       const folders = vscode.workspace.workspaceFolders ?? [];
       const folder =
         params.workspaceFolder !== undefined
-          ? folders.find((candidate) => candidate.name === params.workspaceFolder)
+          ? folders.find(
+              (candidate) => candidate.name === params.workspaceFolder,
+            )
           : folders[0];
-      const started = await vscode.debug.startDebugging(folder, params.configName ?? "");
+      const started = await vscode.debug.startDebugging(
+        folder,
+        params.configName ?? "",
+      );
       return { started };
     },
 
     "debug/stop": async (params) => {
       const session =
-        params.sessionId !== undefined ? state.findDebugSession(params.sessionId) : vscode.debug.activeDebugSession;
+        params.sessionId !== undefined
+          ? state.findDebugSession(params.sessionId)
+          : vscode.debug.activeDebugSession;
       if (!session) {
         return { stopped: false };
       }
@@ -278,7 +335,11 @@ export function createHandlers(state: BridgeState): Handlers {
     "debug/getSessions": async () => {
       const sessions: DebugSessionInfo[] = state
         .listDebugSessions()
-        .map((session) => ({ id: session.id, name: session.name, type: session.type }));
+        .map((session) => ({
+          id: session.id,
+          name: session.name,
+          type: session.type,
+        }));
       return { sessions };
     },
 
@@ -309,17 +370,25 @@ export function createHandlers(state: BridgeState): Handlers {
         return { output };
       }
       const lines = output.split("\n");
-      return { output: lines.slice(Math.max(0, lines.length - params.maxLines)).join("\n") };
+      return {
+        output: lines
+          .slice(Math.max(0, lines.length - params.maxLines))
+          .join("\n"),
+      };
     },
 
     "terminal/run": async (params) => {
       const name = params.name ?? "VS Relay";
-      let terminal = vscode.window.terminals.find((candidate) => candidate.name === name);
+      let terminal = vscode.window.terminals.find(
+        (candidate) => candidate.name === name,
+      );
       terminal ??= vscode.window.createTerminal(name);
       terminal.show();
 
       if (terminal.shellIntegration) {
-        const execution = terminal.shellIntegration.executeCommand(params.command);
+        const execution = terminal.shellIntegration.executeCommand(
+          params.command,
+        );
         void (async () => {
           for await (const chunk of execution.read()) {
             state.appendTerminalOutput(name, chunk);
@@ -336,11 +405,20 @@ export function createHandlers(state: BridgeState): Handlers {
       const kind = params.kind ?? "info";
       let selected: string | undefined;
       if (kind === "warning") {
-        selected = await vscode.window.showWarningMessage(params.message, ...items);
+        selected = await vscode.window.showWarningMessage(
+          params.message,
+          ...items,
+        );
       } else if (kind === "error") {
-        selected = await vscode.window.showErrorMessage(params.message, ...items);
+        selected = await vscode.window.showErrorMessage(
+          params.message,
+          ...items,
+        );
       } else {
-        selected = await vscode.window.showInformationMessage(params.message, ...items);
+        selected = await vscode.window.showInformationMessage(
+          params.message,
+          ...items,
+        );
       }
       return { selected: selected ?? null };
     },
@@ -350,12 +428,18 @@ export function createHandlers(state: BridgeState): Handlers {
       if (params.placeholder !== undefined) {
         options.placeHolder = params.placeholder;
       }
-      const selected: string | undefined = await vscode.window.showQuickPick(params.items, options);
+      const selected: string | undefined = await vscode.window.showQuickPick(
+        params.items,
+        options,
+      );
       return { selected: selected ?? null };
     },
 
     "ui/executeCommand": async (params) => {
-      const result = await vscode.commands.executeCommand(params.command, ...(params.args ?? []));
+      const result = await vscode.commands.executeCommand(
+        params.command,
+        ...(params.args ?? []),
+      );
       return { result };
     },
 
@@ -373,7 +457,10 @@ export function createHandlers(state: BridgeState): Handlers {
         .sort((a, b) => a.id.localeCompare(b.id));
 
       const { query } = params;
-      const filtered = query !== undefined ? commands.filter((command) => matchesQuery(command, query)) : commands;
+      const filtered =
+        query !== undefined
+          ? commands.filter((command) => matchesQuery(command, query))
+          : commands;
       return { commands: filtered };
     },
   };

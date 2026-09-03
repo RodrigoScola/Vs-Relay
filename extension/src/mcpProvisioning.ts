@@ -8,7 +8,9 @@ type ReadOutcome =
   | { kind: "unreadable" };
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : undefined;
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 async function readJsonFile(uri: vscode.Uri): Promise<ReadOutcome> {
@@ -60,12 +62,20 @@ async function ensureMcpEntry(
   };
 
   await vscode.workspace.fs.createDirectory(dirUri);
-  await vscode.workspace.fs.writeFile(fileUri, Buffer.from(`${JSON.stringify(nextData, null, 2)}\n`, "utf8"));
+  await vscode.workspace.fs.writeFile(
+    fileUri,
+    Buffer.from(`${JSON.stringify(nextData, null, 2)}\n`, "utf8"),
+  );
   return "created";
 }
 
-export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.OutputChannel): Promise<void> {
-  const autoConfigure = vscode.workspace.getConfiguration("vsRelay").get<boolean>("autoConfigureMcp");
+export async function ensureMcpConfigured(
+  mcpHttpPort: number,
+  output: vscode.OutputChannel,
+): Promise<void> {
+  const autoConfigure = vscode.workspace
+    .getConfiguration("vsRelay")
+    .get<boolean>("autoConfigureMcp");
   if (autoConfigure === false) {
     return;
   }
@@ -78,8 +88,13 @@ export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.Ou
   const created: string[] = [];
 
   for (const folder of folders) {
-    const claudeCodeResult = await ensureMcpEntry(folder.uri, ".mcp.json", "mcpServers", mcpHttpPort);
-    if (claudeCodeResult === "created") {
+    const agentClientResult = await ensureMcpEntry(
+      folder.uri,
+      ".mcp.json",
+      "mcpServers",
+      mcpHttpPort,
+    );
+    if (agentClientResult === "created") {
       created.push(vscode.Uri.joinPath(folder.uri, ".mcp.json").fsPath);
     }
 
@@ -90,7 +105,9 @@ export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.Ou
       mcpHttpPort,
     );
     if (vscodeResult === "created") {
-      created.push(vscode.Uri.joinPath(folder.uri, ".vscode", "mcp.json").fsPath);
+      created.push(
+        vscode.Uri.joinPath(folder.uri, ".vscode", "mcp.json").fsPath,
+      );
     }
   }
 
@@ -101,7 +118,7 @@ export async function ensureMcpConfigured(mcpHttpPort: number, output: vscode.Ou
   output.appendLine(`Configured MCP server entries in:\n${created.join("\n")}`);
   const selection = await vscode.window.showInformationMessage(
     `VS Relay: added MCP server config to ${String(created.length)} file(s). ` +
-      "Restart your MCP client (e.g. Claude Code) to connect.",
+      "Restart your MCP client to connect.",
     "Show Output",
   );
   if (selection === "Show Output") {

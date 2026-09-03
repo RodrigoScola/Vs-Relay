@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from "node:http";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DEFAULT_MCP_HTTP_PORT, DEFAULT_PORT } from "@claude-vscode/shared";
+import { DEFAULT_MCP_HTTP_PORT, DEFAULT_PORT } from "@agents-vscode/shared";
 import { BridgeClient } from "./wsClient.js";
 import { registerTools } from "./tools.js";
 import { SERVER_INSTRUCTIONS } from "./instructions.js";
@@ -29,7 +33,11 @@ async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return raw.length > 0 ? JSON.parse(raw) : undefined;
 }
 
-function sendJsonRpcError(res: ServerResponse, status: number, message: string): void {
+function sendJsonRpcError(
+  res: ServerResponse,
+  status: number,
+  message: string,
+): void {
   res.writeHead(status, { "Content-Type": "application/json" }).end(
     JSON.stringify({
       jsonrpc: "2.0",
@@ -81,7 +89,8 @@ async function main(): Promise<void> {
 
     void (async () => {
       const sessionId = req.headers["mcp-session-id"];
-      const existing = typeof sessionId === "string" ? transports.get(sessionId) : undefined;
+      const existing =
+        typeof sessionId === "string" ? transports.get(sessionId) : undefined;
 
       if (existing) {
         await existing.handleRequest(req, res);
@@ -110,7 +119,9 @@ async function main(): Promise<void> {
   });
 
   httpServer.listen(httpPort, "127.0.0.1", () => {
-    console.error(`VS Relay MCP server listening on http://127.0.0.1:${String(httpPort)}/mcp`);
+    console.error(
+      `VS Relay MCP server listening on http://127.0.0.1:${String(httpPort)}/mcp`,
+    );
   });
 }
 

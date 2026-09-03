@@ -1,12 +1,12 @@
 # VS Relay
 
-Lets Claude (via MCP) drive a running VSCode instance: read editor/diagnostic state,
+Lets agents (via MCP) drive a running VSCode instance: read editor/diagnostic state,
 open and edit files, run tasks and debug sessions, and trigger UI actions.
 
 ## Architecture
 
 ```
-Claude  <--stdio (MCP)-->  mcp-server  <--WebSocket (localhost)-->  extension  <--VSCode API-->  VSCode
+Agents  <--stdio/HTTP (MCP)-->  bundled MCP server  <--WebSocket (localhost)-->  extension  <--VSCode API-->  VSCode
 ```
 
 - **`shared/`** — protocol types shared by both sides (`RpcRequest`/`RpcResponse`, method table).
@@ -25,9 +25,9 @@ can do anything — it's a thin client that fails fast with a clear error if it 
 `mcp-server` (via esbuild, into `extension/bundled/mcp-server.cjs`) so the packaged `.vsix` doesn't
 depend on a separate `npm install`/build of `mcp-server` — it's just `node` + one file. On
 activation, the extension automatically adds a `vs-relay` entry (pointing at that bundled
-file) to `.mcp.json` (Claude Code CLI) and `.vscode/mcp.json` (VSCode's own MCP support, e.g.
+file) to `.mcp.json` (agent clients) and `.vscode/mcp.json` (VSCode's own MCP support, e.g.
 Copilot) in every open workspace folder, if one isn't already present — so installing the
-extension is normally the *only* setup step; there is nothing to configure by hand. It never
+extension is normally the _only_ setup step; there is nothing to configure by hand. It never
 overwrites an existing `vs-relay` entry or touches a file it can't parse. Disable this with
 `"vsRelay.autoConfigureMcp": false`.
 
@@ -49,16 +49,16 @@ npm workspaces).
    file and a sample task. `test-workspace/.vscode/mcp.json` was created manually before
    auto-provisioning existed and points at the dev-mode `mcp-server/dist/index.js`; the
    auto-provisioning feature described above only fills in a `vs-relay` entry when one is
-   *missing*, so it leaves that file alone. Check the extension's status bar item or the "VS
+   _missing_, so it leaves that file alone. Check the extension's status bar item or the "VS
    Relay" output channel to confirm it's listening, then use the MCP/Tools view in that
    window (or Copilot Chat's MCP picker) to start the `vs-relay` server and try a tool
    against `test-workspace/src/sample.ts`.
 2. **Point an MCP client at the server.** This repo's root already has [`.mcp.json`](.mcp.json)
-   configuring `vs-relay` for the **Claude Code CLI** — restart Claude Code (or start a fresh
+   configuring `vs-relay` for the **agent CLI** — restart your agent client (or start a fresh
    session) in this directory and it'll show up under `/mcp` (it'll ask for a one-time trust
-   approval for the project-scoped server). Note this is a *different* file/format from
+   approval for the project-scoped server). Note this is a _different_ file/format from
    `test-workspace/.vscode/mcp.json`, which is VSCode's own built-in MCP config (used by e.g.
-   Copilot Chat) — Claude Code CLI does not read `.vscode/mcp.json`. For Claude Desktop, or any
+   Copilot Chat) — agent CLI does not read `.vscode/mcp.json`. For another MCP client, or any
    other project, add the same shape under `mcpServers` to that tool's config:
 
    ```json
@@ -78,14 +78,11 @@ npm workspaces).
 
 ### Testing without a full MCP client
 
-- **`.vscode/launch.json` → "Run Extension + MCP Inspector"** starts the Extension Development
-  Host and runs the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) against the
-  built server, giving you a web UI to call each tool by hand.
-- **"Debug MCP Server (stdio)"** launches `mcp-server` under the Node debugger directly, useful
-  for stepping through startup/connection logic.
-- **`.vscode/tasks.json` → "watch: all"** runs `tsc --watch` for all three packages so edits
-  rebuild automatically while the Extension Development Host is open (reload it with
-  `Ctrl+R`/`Cmd+R` to pick up changes).
+Host and runs the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) against the
+built server, giving you a web UI to call each tool by hand.
+for stepping through startup/connection logic.
+rebuild automatically while the Extension Development Host is open (reload it with
+`Ctrl+R`/`Cmd+R` to pick up changes).
 
 ## Testing
 
@@ -115,7 +112,6 @@ passed through from zod-parsed tool arguments.
 1. Add the method to `Methods` in `shared/src/index.ts` (params/result types).
 2. Implement it in `extension/src/handlers.ts`.
 3. Expose it as a tool in `mcp-server/src/tools.ts` with a zod input schema.
-
 
 ## Packaging the extension
 

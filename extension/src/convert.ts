@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import type { Position, Range as SharedRange } from "@claude-vscode/shared";
+import type { Position, Range as SharedRange } from "@agents-vscode/shared";
 
 export function toSharedPosition(p: vscode.Position): Position {
   return { line: p.line, character: p.character };
@@ -17,7 +17,9 @@ export function toVscodeRange(r: SharedRange): vscode.Range {
   return new vscode.Range(toVscodePosition(r.start), toVscodePosition(r.end));
 }
 
-export function severityToString(s: vscode.DiagnosticSeverity): "error" | "warning" | "information" | "hint" {
+export function severityToString(
+  s: vscode.DiagnosticSeverity,
+): "error" | "warning" | "information" | "hint" {
   switch (s) {
     case vscode.DiagnosticSeverity.Error:
       return "error";
