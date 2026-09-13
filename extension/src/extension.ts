@@ -73,13 +73,16 @@ export function activate(context: vscode.ExtensionContext): void {
 
   startServer(context, output);
 
-  void ensureMcpConfigured(getMcpHttpPort(), output).catch((error: unknown) => {
-    output.appendLine(
-      `Failed to auto-configure MCP server entries: ${String(error)}`,
-    );
-  });
-
   context.subscriptions.push(
+    vscode.commands.registerCommand("vsRelay.configureMcp", () => {
+      void ensureMcpConfigured(getMcpHttpPort(), output).catch(
+        (error: unknown) => {
+          output.appendLine(
+            `Failed to configure MCP server entries: ${String(error)}`,
+          );
+        },
+      );
+    }),
     vscode.commands.registerCommand("vsRelay.restart", () => {
       startServer(context, output);
       void vscode.window.showInformationMessage(

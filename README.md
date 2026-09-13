@@ -26,9 +26,9 @@ can do anything — it's a thin client that fails fast with a clear error if it 
 depend on a separate `npm install`/build of `mcp-server` — it's just `node` + one file. On
 activation, the extension automatically adds a `vs-relay` entry (pointing at that bundled
 file) to `.mcp.json` (agent clients) and `.vscode/mcp.json` (VSCode's own MCP support, e.g.
-Copilot) in every open workspace folder, if one isn't already present — so installing the
-extension is normally the _only_ setup step; there is nothing to configure by hand. It never
-overwrites an existing `vs-relay` entry or touches a file it can't parse. Disable this with
+Copilot) in every open workspace folder, if one isn't already present. This only happens when you
+run **VS Relay: Configure MCP**; activation does not create or modify workspace files. It never
+overwrites an existing `vs-relay` entry or touches a file it can't parse. Disable this command with
 `"vsRelay.autoConfigureMcp": false`.
 
 ## Setup
@@ -47,12 +47,11 @@ npm workspaces).
    Development Host)"). This opens a second VSCode window with the bridge extension active,
    pre-loaded with [`test-workspace/`](test-workspace) — a small scratch folder with a sample
    file and a sample task. `test-workspace/.vscode/mcp.json` was created manually before
-   auto-provisioning existed and points at the dev-mode `mcp-server/dist/index.js`; the
-   auto-provisioning feature described above only fills in a `vs-relay` entry when one is
-   _missing_, so it leaves that file alone. Check the extension's status bar item or the "VS
-   Relay" output channel to confirm it's listening, then use the MCP/Tools view in that
-   window (or Copilot Chat's MCP picker) to start the `vs-relay` server and try a tool
-   against `test-workspace/src/sample.ts`.
+   configuration command existed and points at the dev-mode `mcp-server/dist/index.js`; the
+   Configure MCP command only fills in a `vs-relay` entry when one is _missing_, so it leaves that
+   file alone. Check the extension's status bar item or the "VS Relay" output channel to confirm
+   it's listening, then use the MCP/Tools view in that window (or Copilot Chat's MCP picker) to
+   start the `vs-relay` server and try a tool against `test-workspace/src/sample.ts`.
 2. **Point an MCP client at the server.** This repo's root already has [`.mcp.json`](.mcp.json)
    configuring `vs-relay` for the **agent CLI** — restart your agent client (or start a fresh
    session) in this directory and it'll show up under `/mcp` (it'll ask for a one-time trust

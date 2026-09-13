@@ -29,12 +29,11 @@ On activation, the extension:
 1. Starts a local WebSocket server (`127.0.0.1:4823` by default) that answers editor/file/run/debug
    requests using the VSCode API.
 2. Spawns its own bundled MCP server alongside it.
-3. Automatically adds a `vs-relay` entry to `.mcp.json` (agent clients) and
-   `.vscode/mcp.json` (VSCode's built-in MCP support, e.g. Copilot Chat) in every open workspace
-   folder, if one isn't already present.
 
-Nothing else needs to be configured by hand. Restart your agent client (or start a fresh session) in the
-workspace and `vs-relay` will show up under `/mcp`.
+When you need workspace configuration, run **VS Relay: Configure MCP** from the Command Palette. It
+adds a `vs-relay` entry to `.mcp.json` (agent clients) and `.vscode/mcp.json` (VSCode's built-in MCP
+support, e.g. Copilot Chat) in each open workspace folder, if one isn't already present. Restart your
+agent client (or start a fresh session) in the workspace and `vs-relay` will show up under `/mcp`.
 
 The extension must stay running (i.e. the workspace open in VSCode) for tool calls to work — if
 it's not, agents get a clear "could not connect" error instead of hanging.
@@ -62,16 +61,17 @@ you changed `vsRelay.port` below.
 
 ## Settings
 
-| Setting                    | Default | Description                                                                                                                 |
-| -------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `vsRelay.port`             | `4823`  | Port the bridge WebSocket server listens on.                                                                                |
-| `vsRelay.mcpHttpPort`      | `4824`  | Port the bundled MCP server's HTTP endpoint listens on.                                                                     |
-| `vsRelay.autoConfigureMcp` | `true`  | Automatically add a `vs-relay` entry to `.mcp.json` / `.vscode/mcp.json` on activation. Never overwrites an existing entry. |
+| Setting                    | Default | Description                                                                                                                           |
+| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `vsRelay.port`             | `4823`  | Port the bridge WebSocket server listens on.                                                                                          |
+| `vsRelay.mcpHttpPort`      | `4824`  | Port the bundled MCP server's HTTP endpoint listens on.                                                                               |
+| `vsRelay.autoConfigureMcp` | `true`  | Allows **VS Relay: Configure MCP** to add a `vs-relay` entry to `.mcp.json` / `.vscode/mcp.json`. Never overwrites an existing entry. |
 
 ## Commands
 
 - **VS Relay: Restart Server** — restart the WebSocket/MCP server without reloading the window.
 - **VS Relay: Show Status** — check whether the bridge is listening and on which port.
+- **VS Relay: Configure MCP** — add the `vs-relay` entry to workspace MCP configuration files.
 
 ## How it works
 
@@ -88,5 +88,5 @@ nothing separate to install or build — just the extension.
   window. Open the workspace in VSCode and check **VS Relay: Show Status**.
 - **Port already in use** — another instance (or another app) is bound to `4823`/`4824`. Change
   `vsRelay.port` / `vsRelay.mcpHttpPort` in settings and reload.
-- **`vs-relay` entry missing from `/mcp`** — check `vsRelay.autoConfigureMcp` is `true`,
-  or add the entry manually as shown above.
+- **`vs-relay` entry missing from `/mcp`** — run **VS Relay: Configure MCP** with
+  `vsRelay.autoConfigureMcp` set to `true`, or add the entry manually as shown above.

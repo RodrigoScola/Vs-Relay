@@ -46,6 +46,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "vsRelay.configureMcp",
+        "title": "VS Relay: Configure MCP"
+      },
+      {
         "command": "vsRelay.restart",
         "title": "VS Relay: Restart Server"
       },
@@ -70,7 +74,7 @@
         "vsRelay.autoConfigureMcp": {
           "type": "boolean",
           "default": true,
-          "description": "On activation, automatically add a \"vs-relay\" MCP server entry to .mcp.json and .vscode/mcp.json in each open workspace folder if one isn't already present, pointing at this extension's bundled MCP server."
+          "description": "Allow the Configure MCP command to add a \"vs-relay\" MCP server entry to .mcp.json and .vscode/mcp.json in each open workspace folder if one isn't already present."
         }
       }
     }
